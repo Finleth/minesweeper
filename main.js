@@ -95,8 +95,8 @@ class GameController {
     }
 
     handleCellClick(event){
-        let y = event.target.attributes.y.nodeValue;
-        let x = event.target.attributes.x.nodeValue;
+        let y = event.target.attributes.y.nodeValue >> 0;
+        let x = event.target.attributes.x.nodeValue >> 0;
 
         this.openCell(y, x);
     }
@@ -107,10 +107,9 @@ class GameController {
         if (result){
             switch (result){
                 case 1:
-                    console.log('was a mine');
+                    alert('was a mine');
                     break;
                 case 2:
-                    debugger;
                     this.openAdjSpots(y, x);
                     break;
                 case 3:
@@ -165,13 +164,17 @@ class GameView {
     }
 
     openCell(y, x, cell){
-        let text = $('<p>',{
-            text: cell.adjMines
+        let text = cell.adjMines;
+        if (!cell.adjMines){
+            text = "";
+        }
+        let textTag = $('<p>',{
+            text: text
         })
-        $(`.cell[y=${y}][x=${x}]`).removeClass('clickable').append(text);
+        $(`.cell[y=${y}][x=${x}]`).removeClass('clickable').append(textTag);
     }
 
     addCellClickHandlers(callback){
-        $('.game-container').on('click', '.cell', callback);
+        $('.game-container').on('click', '.clickable', callback);
     }
 }
