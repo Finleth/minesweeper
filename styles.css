@@ -41,3 +41,30 @@ header > h1 {
     max-height: 90vh;
     background-color: rgb(190, 196, 255);
 }
+
+.row {
+    width: 100%;
+}
+
+.cell {
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    font-size: 2rem;
+}
+
+.cell > p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.clickable {
+    border: 2px solid;
+    border-color: rgb(219, 219, 219) rgb(92, 92, 92) grey  white;
+}
+
+.clickable:active {
+    border-color: grey white rgb(219, 219, 219) rgb(92, 92, 92);
+}
