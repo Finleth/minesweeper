@@ -1,7 +1,7 @@
 let game;
 
 let initializeApp = () => {
-    game = new GameController(10);
+    game = new GameController(10, 10);
     game.initializeGame();
 }
 
@@ -9,10 +9,12 @@ $(document).ready( initializeApp );
 
 
 class GameData {
-    constructor(size){
+    constructor(size, mineCount){
         this.gameBoard = [];
         this.totalCells = null;
         this.size = size;
+        this.availableSafeCells = null;
+        this.mineCount = mineCount;
     }
 
     createArrayMatrix(){
@@ -27,7 +29,7 @@ class GameData {
     }
 
     addMines(){
-        let mines = 10;
+        let mines = this.mineCount;
         while (mines > 0){
             let y = (Math.random() * this.size) >> 0;
             let x = (Math.random() * this.size) >> 0;
@@ -38,6 +40,14 @@ class GameData {
                 mines--;
             }
         }
+    }
+
+    calculateSafeCells(){
+        this.availableSafeCells = (this.size * this.size) - this.mineCount;
+    }
+
+    reduceSafeCellCount(){
+        return --this.availableSafeCells;
     }
 
     getCell(y, x){
@@ -60,8 +70,6 @@ class GameData {
         }
         currentCell.display = 1;
 
-        console.log(currentCell);
-
         if (currentCell.mine){
             return 1;
         } else if (!currentCell.adjMines){
@@ -81,8 +89,8 @@ class Cell {
 }
 
 class GameController {
-    constructor(size){
-        this.model = new GameData(size);
+    constructor(size, mineCount){
+        this.model = new GameData(size, mineCount);
         this.view = new GameView();
         this.size = size
     }
@@ -90,6 +98,7 @@ class GameController {
     initializeGame(){
         this.model.createArrayMatrix();
         this.model.addMines();
+        this.model.calculateSafeCells();
         this.view.createBoardOnDOM( this.size );
         this.view.addCellClickHandlers( this.handleCellClick.bind(this) );
     }
@@ -105,18 +114,19 @@ class GameController {
         let result = this.model.open(y, x);
 
         if (result){
+            this.view.openCell(y, x, this.model.getCell(y, x));
+
             switch (result){
                 case 1:
-                    alert('was a mine');
                     break;
                 case 2:
                     this.openAdjSpots(y, x);
-                    break;
                 case 3:
-                    console.log('there were adjacent mines');
+                    if (!this.model.reduceSafeCellCount()){
+                        console.log('you win!');
+                    };
                     break;
             }
-            this.view.openCell(y, x, this.model.getCell(y, x));
         }
     }
 
@@ -164,14 +174,23 @@ class GameView {
     }
 
     openCell(y, x, cell){
-        let text = cell.adjMines;
-        if (!cell.adjMines){
-            text = "";
+        let cellTag;
+
+        if (cell.mine){
+            cellTag = $('<i>',{
+                'class': 'fab fa-git-square'
+            })
+        } else if (!cell.adjMines){
+            cellTag = $('<p>',{
+                text: ""
+            })
+        } else {
+            cellTag = $('<p>',{
+                text: cell.adjMines
+            })
         }
-        let textTag = $('<p>',{
-            text: text
-        })
-        $(`.cell[y=${y}][x=${x}]`).removeClass('clickable').append(textTag);
+        
+        $(`.cell[y=${y}][x=${x}]`).removeClass('clickable').append(cellTag);
     }
 
     addCellClickHandlers(callback){
